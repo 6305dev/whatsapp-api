@@ -1,12 +1,14 @@
 require("dotenv").config();
-
 const express = require("express");
 const { initWhatsapp, sendText } = require("./whatsapp");
 const app = express();
-const PORT = process.env.PORT;
 const normalizePhone = require("./utils/phone");
+const port = process.env.PORT;
+const cors = require("cors");
 
+app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 app.get("/", (req, res) => {
   res.json({
@@ -21,7 +23,7 @@ app.post("/send", async (req, res) => {
   if (!phone || !message) {
     return res.status(400).json({
       success: false,
-      error: "phone dan message wajib diisi",
+      error: "phone and message required.",
     });
   }
 
@@ -30,7 +32,7 @@ app.post("/send", async (req, res) => {
   if (!normalizedPhone) {
     return res.status(400).json({
       success: false,
-      error: "phone tidak valid",
+      error: "phone number invalid.",
     });
   }
 
@@ -39,7 +41,7 @@ app.post("/send", async (req, res) => {
 
     res.json({
       success: true,
-      message: "Pesan berhasil dikirim",
+      message: "message sent.",
     });
   } catch (err) {
     res.status(500).json({
@@ -49,7 +51,7 @@ app.post("/send", async (req, res) => {
   }
 });
 
-app.listen(PORT, async () => {
-  console.log(`🚀 API running on http://localhost:${PORT}`);
+app.listen(port, async () => {
+  console.log(`🚀 API running on port: ${port}`);
   await initWhatsapp();
 });
